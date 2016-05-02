@@ -13,7 +13,8 @@ import hashlib
 
 class DB(object):
     def __init__(self):
-        os.remove("db.json")
+        if os.path.exists('db.json'):
+            os.remove("db.json")
         self.db = TinyDB("db.json",indent=2)
 
     def insert(self,table,key,value):
@@ -58,12 +59,16 @@ def post_file_name_splitter(file_name):
 def handle_js():
     if os.path.exists('Site/js'):
         shutil.rmtree('Site/js')
-    shutil.copytree('js', 'Site/js')
+    
+    if os.path.exists('js'):
+        shutil.copytree('js', 'Site/js')
 
 def handle_css():
     if os.path.exists('Site/css'):
         shutil.rmtree('Site/css')
-    shutil.copytree('css', 'Site/css')
+
+    if os.path.exists('css'):
+        shutil.copytree('css', 'Site/css')
 
 def post_discovery():
     for root, subfolders, files in os.walk('Posts'):
@@ -90,28 +95,29 @@ def post_compile():
     os.chdir(owd)
     for root_fldr,post_fldr,slides in op_list:
         try:
-            os.makedirs(os.path.join("Site",root_fldr,post_fldr))
+            os.makedirs(os.path.join("Site",root_fldr))
         except:
             print '.'
         for slide in slides:
             shutil.copy(os.path.join(temp_dire,root_fldr,slide),
-                os.path.join("Site",root_fldr,post_fldr,slide))
+                os.path.join("Site",root_fldr,slide))
     
         P = _template.get_template('Templates/post.html')
         html_content = P.render(slides=sorted(slides))
-        html_file = os.path.join("Site",root_fldr,post_fldr, 'index.html')
+        html_file = os.path.join("Site",root_fldr, 'index.html')
         open(html_file , "w").write(html_content)
-        
+    
 
 def make_pages():
     posts=[]
+    months=[ 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
     for R in _db.get_all('posts'):
         posts.append({
             'title': R['title'][:-4].replace('-',' '),
-            'url'  : os.path.join(R['root_path'],R['title'][:-4]),
+            'url'  : os.path.join(R['root_path']),
             'year' : R['year'],
             'day'  : R['day'],
-            'month': R['month']
+            'month': months[int(R['month'])-1],
         })
     for file_name in os.listdir('./'):
         if file_name.endswith('.html'):
@@ -119,9 +125,6 @@ def make_pages():
             html_content = P.render(posts=posts)
             html_file = os.path.join("Site", file_name)
             open(html_file , "w").write(html_content)
-
-
-
 
 def post_gen_one(post_reco):
     owd = os.getcwd()
@@ -135,7 +138,7 @@ def post_gen_one(post_reco):
     open("Makefile","w").write(make_file_cont)
     open("post.sty","w").write(_sty_content)
     os.system("make")
-    slides = [f for f in os.listdir('./') if f.endswith(_slide_ext)]
+    slides = [f for f in os.listdir('./') if f.endswith(_slide_ext) and f.startswith('slide')]
     os.chdir(owd)
     return slides
 

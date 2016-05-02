@@ -1,0 +1,169 @@
+\documentclass[10pt]{article}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage[backend=biber,sorting=ydnt]{biblatex}
+\usepackage{array}
+
+\usepackage{post}
+
+\title{Back Propagation Algorithm\\{\normalsize  In my understanding}}
+\addbibresource{bibfile.bib}
+
+
+\author{}
+\date{}
+
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\def\pdiff#1#2{ {\partial #1 \over \partial #2}}
+
+\def\ind#1{
+%#1
+\myind(#1)
+}
+
+
+\def\myind(#1,#2,#3){
+%#1#2#3
+\ensuremath{ ^{#1}_{{#2}{#3}}}
+}
+
+
+\newenvironment{vardef}
+{\begin{center} \begin{tabular}{>{$}r<{$\;:}l} }
+{\end{tabular} \end{center}}
+\begin{document}
+
+
+\maketitle
+\begin{abstract}
+Back propagation is one of the main pillars of deep learning and associated machine learning algorithms.
+Here is my attempt to decipher it but in a more theoretical aspect.
+The following article is based on the approach take by Yann Le Cun in his paper \cite{le1988theoretical} in which back propagation algorithm is derived from Lagrangian of the optimization problem.
+This article can also be viewed as an attempt to aggregate main concepts form the afore mentioned paper.
+\end{abstract}
+
+\section{Method of Lagrange multipliers}
+
+If we have an optimization problem 
+\begin{align}
+\min_{x\in \Omega} & f(x)\\
+\Omega =& \{x| g(x) =0\} \nonumber
+\end{align}
+The Lagrangian function of the problem is given by
+\begin{equation}
+	L(x,\lambda) = f(x) + \lambda g(x)
+\end{equation}
+At the optimum point, we have following conditions
+\begin{align}
+	\nabla L_x(x,\lambda) &= 0\\ 
+	\nabla L_\lambda(x,\lambda) &= 0 
+\end{align}
+Where $\nabla L$ represent the gradient of the Lagrangian function.
+
+\section{Notations}
+\begin{vardef}
+	A_p(k) & Activation of layer $k$ with respect to pattern $p$\\
+	W(k) & Weight matrix between layer $k-1$ and $k$\\
+	F & Activation function, usually sigmoid function
+\end{vardef}
+$$	Z_p(k)= W(k)A_p(k-1)$$
+
+
+\section{Model of the neural network}
+The network has $N+1$ layers numbers from $0$ to $N$. The layer $0$ is assumed to be  the input layer and $N$, the output layer.
+We want out network to be able to recognize $P$ patterns. 
+
+
+For a particular input pattern $p$ we have,
+$$A_p(k) = F\left[Z_p(k)\right]$$
+
+As we are trying to use the network to predict a desired output $D_p$ for a particular inout pattern$I_p$, we would like the output of the last layer to match the desired output. Ideally we want $A_p(N) = D_p$. 
+But the output of the last layer depends on the output of previous layers and the weights in the network. The learning process is simply adjusting the weights of the network so that $A_p(N)$ closely matches the desired output. 
+The error in prediction of the network is measured by a cost function $C[A(N) , D]$.
+$$C[A(N) , D]=\sum_pC[A_p(N) , D_p]$$
+
+Since the desired output does not change, $C$ is simply a function of just output activation of the last layer. An example of of cost function which is commonly used is $C[A_p(N)] =\|A_p(N) - D_p\|^2$
+
+
+
+So we can view the network trying to find the optimum point of the optimization problem
+\begin{align}
+\min_{W\in \Omega} & C[A(N)] \label{eq:nn}\\
+\Omega  =& \{W| A_p(k)= F\left[W(k)A_p(k-1)\right]\} \nonumber
+\end{align}
+
+
+\section{The Lagrangian of the network}
+
+The Lagrangian function of the optimization problem  in equation \ref{eq:nn} is can be written as
+
+\begin{align}
+L_p(W,A_p,\Lambda_p) &= C\left[A_p(N)\right] + \sum_k \Lambda_p(k)\left( A_p(k) - F\left[Z_p(k)\right]\right)\\
+L(W,A,\Lambda) &= \sum_p L_p(W,A_p,\Lambda_p)\\
+\Lambda &: \mbox{Lagrangian multipliers}\nonumber
+\end{align}
+
+The necessary condition for local minima of the cost function is given by
+\begin{align}
+	\nabla L(W,A,\Lambda) &=0\\
+	\intertext{Which gives three different equations}
+	\pdiff{L(W,A,\Lambda)}{\Lambda}&=0 \label{eq:derL}\\
+	\pdiff{L(W,A,\Lambda)}{A}&=0 \label{eq:derA}\\
+	\pdiff{L(W,A,\Lambda)}{W}&=0 \label{eq:derW}
+\end{align}
+
+Equation \ref{eq:derL} results in $N\ast{}P$ separate equation $ \pdiff{L_p(W,A_p,\Lambda_p)}{\Lambda_p(k)}=0$ which simply gives 
+\begin{equation}
+A_p(k) = F\left[W(k) A_p(k-1)\right] \hspace{1cm} \forall k\in\left[1,N\right], p \in \left[1,P\right]
+\end{equation}
+This, simply give us back  the equations governing forward propagation of the network.
+
+$\circ$ Equation \ref{eq:derA} can be decomposed into $NP$ sub conditions
+\begin{align}
+	\pdiff{L_p(W,A_p,\Lambda_p)}{A_p(k)}&=0 \hspace{10pt}\forall k\in\left[1,N\right], p\in\left[1,P\right]\\
+	\intertext{$k=N$ gives}
+	\Lambda_p(N) &= \pdiff{C\left[A_p(N)\right]}{A_p(N)}\\
+	\intertext{$k\neq N$ gives}
+	\Lambda_p(k) &= W(k+1)^T \left(\pdiff{F\left[Z_p(k+1)\right]}{Z_p(k+1)}\right) \Lambda_p(k+1)\\
+	\Lambda_p(k) &= W(k+1)^T \nabla F\left[Z_p(k+1)\right] \Lambda_p(k+1)\\
+	\intertext{Lets define a substitution to simplify things}
+	\Phi_p(k) &= \nabla F\left[Z_p(k)\right]  \Lambda_p(k)\\
+	\intertext{We have}
+	\Phi_p(N) &= \nabla F\left[Z_p(N)\right]  \nabla C\left[A_p(N)\right]\\
+	\Phi_p(k) &= W(k+1)^T \nabla F\left[Z_p(k)\right]  \Phi_p(k+1) 
+\end{align}
+
+
+$\circ$ Equation \ref{eq:derW} gives $k$ equalities as follows
+
+\begin{align}
+\sum_p - \nabla F\left[Z_p(k+1)\right]&\Lambda_p(k)  A_p^T(k-1) = 0\\
+\intertext{Or as before we have}
+\sum_p Y(k)  A_p^T(k-1) &= 0 \hspace{10pt} \forall k\in\left[1,N\right]
+\end{align}
+
+This equation gives that $W$ is a stationary point of $L$ and hence to find the optimum point, we use Gradient descent
+\begin{align}
+	W(k) &\gets W(k) - \eta\pdiff{L(W,A,\Lambda)}{W(k)}\\
+	W(k) &\gets W(k) - \eta \sum_p \Phi(k)  A_p^T(k-1)
+\end{align}
+
+
+\section{Back propagation algorithm}
+
+\begin{align}
+	\Phi_p(N) &= \nabla F\left[W_p(N)A_p(N-1)\right]  \nabla C\left[A_p(N)\right] \label{eq:bp1}\\
+	\Phi_p(k) &= W(k+1)^T \nabla F\left[W_p(k)A_p(k-1)\right]  \Phi_p(k+1) \label{eq:bp2}\\ 
+	A_p(0) &=I_p \label{eq:bp3}\\
+	W(k) &\gets W(k) - \eta \sum_p \Phi(k)  A_p^T(k-1) \label{eq:bp4}
+\end{align}
+
+Compute  Equations \ref{eq:bp1},  \ref{eq:bp2} and \ref{eq:bp3} for each $p$ and $k$. Then compute Equation  \ref{eq:bp4}. Then we have back propagation algorithm. $\eta$ is the learning rate of the algorithm.
+
+\printbibliography
+
+
+\end{document}
