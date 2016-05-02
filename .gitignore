@@ -1,0 +1,3 @@
+Site/*
+.venv*
+db.json

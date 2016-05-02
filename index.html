@@ -1,0 +1,13 @@
+{% extends "Templates/main.html" %}
+
+
+{% block content %}
+	<p><pre>Nirjhari: The flow</pre></p>
+	{% for post in posts|sort(attribute='year',reverse=True)%}
+		<a href="{{ post.url }}">{{ post.year}}: {{ post.title }}</a><br>
+	{% endfor %}
+	<br>
+	<a href="resume.html"> resume </a>
+	<br>
+	<a href="about.html"> about </a>
+{% endblock %}
