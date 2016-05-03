@@ -1,7 +1,20 @@
 <html>
-<title>Nithish Dv.</title>
+<head>
+  <title>Nirjhari</title>
+  <link rel="stylesheet" type="text/css" href="/static/main.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 <body>
-<div style="margin:auto;width:60%;background-color:white">
-	{% block content %}{% endblock %}
-</div>
+  <div class="header bbox">
+    <hr>
+    <a class="header" id="left"  href="/"         >Nirjhari: The inner flow</span>
+    <a class="header" id="right" href="/more.html">|more</a>
+    <div style="clear:both;"></div>
+    <hr>
+  </div>
+  <br>
+  <div class="bbox">
+    {% block content %}{% endblock %}
+  </div>
 </body>

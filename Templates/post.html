@@ -1,6 +1,7 @@
 {% extends "Templates/main.html" %}
+
 {% block content %}
-		{% for slide in slides %}
-			<img src="{{ slide }}" style="width:100%">
-		{% endfor %}
+  {% for slide in slides %}
+    <img src="{{ slide }}" style="width:100%">
+  {% endfor %}
 {% endblock %}

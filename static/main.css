@@ -1,0 +1,75 @@
+*{
+  margin:0px;
+  padding:0px;
+}
+*:focus {
+  /*get rid of a nasty blue outline in browsers*/
+  outline-width: 0px;
+}
+
+/*begin global*/
+body {
+  background-color:white;
+  font-family:'Open Sans', sans-serif;
+}
+a {
+  text-decoration:none;
+}
+a:hover {
+  color:black;
+}
+a,body {
+  color:#363636;
+}
+/*end global*/
+
+/*begin header*/
+
+div.header{
+  margin-top:5px;
+}
+a.header{
+  font-family:monospace;
+  display:inline-block;
+  padding:10px;
+}
+a.header#left {
+  float:left;
+}
+a.header#right {
+  float:right;
+}
+/*end header*/
+
+/*begin content*/
+div.bbox {
+  width:100%;
+}
+
+@media only screen and (min-width: 768px) {
+  div.bbox {
+    margin-left:auto;
+    margin-right:auto;
+    width:61%;
+  }
+}
+
+/*end content*/
+
+/*posts*/
+span.postlist {
+  font-size:xx-small;
+}
+p.postlist {
+  padding:10px;
+  padding-top:3px;
+  padding-bottom:3px;
+}
+p.postlist:hover,
+p.postlist:focus,
+p.postlist:active {
+  background-color: #dfdcdc;
+}
+/*end posts*/
+
+/*tests */

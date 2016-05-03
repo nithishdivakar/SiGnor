@@ -56,19 +56,14 @@ def post_file_name_splitter(file_name):
     }
     return file_name_record
 
-def handle_js():
-    if os.path.exists('Site/js'):
-        shutil.rmtree('Site/js')
-    
-    if os.path.exists('js'):
-        shutil.copytree('js', 'Site/js')
 
-def handle_css():
-    if os.path.exists('Site/css'):
-        shutil.rmtree('Site/css')
+def handle_static():
+    if os.path.exists('Site/static'):
+        shutil.rmtree('Site/static')
 
-    if os.path.exists('css'):
-        shutil.copytree('css', 'Site/css')
+    if os.path.exists('static'):
+        shutil.copytree('static', 'Site/static')
+
 
 def post_discovery():
     for root, subfolders, files in os.walk('Posts'):
@@ -144,8 +139,7 @@ def post_gen_one(post_reco):
 
 
 
-handle_js()
-handle_css()
+handle_static()
 post_discovery()
 post_compile()
 make_pages()
