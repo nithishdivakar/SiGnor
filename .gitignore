@@ -1,3 +1,2 @@
-Site/*
-.venv*
-db.json
+**/*.pyc
+**/*.log
