@@ -13,13 +13,15 @@ from rsync import copy as rsync_copy
 from spider import Spider
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--src", nargs=1,  help="source directory",default="../src")
-parser.add_argument("-o", "--out", nargs=1,  help="output directory",default="../")
+parser.add_argument("-i", "--src", nargs=1,  help="source directory",default="../nithishdivakar.github.io/src")
+parser.add_argument("-o", "--out", nargs=1,  help="output directory",default="../nithishdivakar.github.io")
 args = parser.parse_args()
 
 
 print args.out
 print args.src
+args.out = args.out[0] if type(args.out)==list else args.out
+args.src = args.src[0] if type(args.src)==list else args.src
 
 out_dir = os.path.abspath(args.out)
 src_dir = os.path.abspath(args.src)
