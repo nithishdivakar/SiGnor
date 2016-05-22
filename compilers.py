@@ -42,13 +42,22 @@ all: {in_file}.dvi
         open('Makefile', 'w').write(makefile)
         #open('post.sty', 'w').write(_sty_content)
         os.system('make')
+        '''
         slides = [f for f in os.listdir('./') if f.endswith(self._slide_ext) and f.startswith('slide')]
         self.add_outputs(slides)
         html = self.template.render(slides=sorted(slides))
         open("index.html",'w').write(html)
         self.add_outputs(["index.html"])
         return True
-
+        '''
+        slides = [f for f in os.listdir('./') if f.endswith(self._slide_ext) and f.startswith('slide')]
+        from bs4 import BeautifulSoup as BS
+        content = [BS(open(f),'html.parser').svg for f in slides]
+        #self.add_outputs(slides)
+        html = self.template.render(slides=content)
+        open("index.html",'w').write(html)
+        self.add_outputs(["index.html"])
+        return True
 
 
 class HtmlCompiler(Compiler):

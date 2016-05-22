@@ -12,20 +12,26 @@ from compilers import HtmlCompiler,TexCompiler
 from rsync import copy as rsync_copy
 from spider import Spider
 
+
+def log_it(Head="LOG", message=""):
+	print "[{:>6}]: {}".format(Head,message)
+
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--src", nargs=1,  help="source directory",default="../nithishdivakar.github.io/src")
 parser.add_argument("-o", "--out", nargs=1,  help="output directory",default="../nithishdivakar.github.io")
 args = parser.parse_args()
 
 
-print args.out
-print args.src
 args.out = args.out[0] if type(args.out)==list else args.out
 args.src = args.src[0] if type(args.src)==list else args.src
 
 out_dir = os.path.abspath(args.out)
 src_dir = os.path.abspath(args.src)
 #print os.path.abspath(args.src)
+log_it("OUT DIR",out_dir)
+log_it("SRC DIR",src_dir)
 
 _template = Environment(loader=FileSystemLoader(os.path.abspath(src_dir)))
 
@@ -40,15 +46,27 @@ Compilers={
     'tex' :TexCompiler (Templates['tex']),
 }
 
-temp_dire = os.path.join(tempfile.gettempdir(), 'BLA') 
+temp_dire = os.path.join('TMP') 
+temp_dire = os.path.abspath(temp_dire)
+'''
+Creating workspacein tmp directory of os is 
+creating many probs in osx. tmp directory change from /var
+to ./private etc 
+'''
+
+log_it("TEMP DIR",temp_dire)
+
 if os.path.exists(temp_dire):
     shutil.rmtree(temp_dire)
 distutils.dir_util.copy_tree(src_dir,temp_dire)
 owd = os.getcwd()
 
+log_it("LOG","Crawling started")
 spider = Spider(temp_dire)
+log_it("LOG","Crawling done")
 # spider.crawl()
-print "Figuring out what to compile"
+
+log_it("LOG","Compileing pages started")
 posts_data=[]
 for post_folder in spider.crawl():
     config = json.load(open(os.path.join(post_folder,"__pub.lish")))
@@ -59,12 +77,18 @@ for post_folder in spider.crawl():
         'year' : time.strftime("%Y",t_date),
         'day'  : time.strftime("%d",t_date),
         'month': time.strftime("%b",t_date),
+        'date' : t_date
     })
     compiler = Compilers[config['type']]
     owd = os.getcwd()
     os.chdir(post_folder)
     compiler.compile(config['file'])
     os.chdir(owd)
+
+import operator
+posts_data.sort(key = operator.itemgetter('date'),reverse=True)
+
+log_it("LOG","Compileing pages done")
 
 def smart_file_copy(src,dest):
     try:
@@ -78,11 +102,14 @@ def smart_file_copy(src,dest):
     rsync_copy(src,dest)
     return True
 
-print "things to copy back"
+
+log_it("LOG","Copying thing into place")
+
 for _,compiler in Compilers.iteritems():
     for f in compiler.get_output_files():
-        print f 
         smart_file_copy(f,os.path.join(out_dir,f[len(temp_dire)+1:]))
+
+log_it("LOG","Copying thing into place : done")
 
 configs = json.load(open(os.path.join(src_dir,"config.json")))
 for static_dir in configs["static_dirs"]:
@@ -99,3 +126,6 @@ for active_file in configs["to_render"]:
     html_content = P.render(posts=posts_data)
     html_file = os.path.join(out_dir, active_file)
     open(html_file, 'w').write(html_content)
+
+
+shutil.rmtree(temp_dire)
