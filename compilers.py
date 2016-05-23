@@ -51,8 +51,23 @@ all: {in_file}.dvi
         return True
         '''
         slides = [f for f in os.listdir('./') if f.endswith(self._slide_ext) and f.startswith('slide')]
+        slides.sort()
         from bs4 import BeautifulSoup as BS
-        content = [BS(open(f),'html.parser').svg for f in slides]
+        def gen_content(slides):
+            content=[]
+            for slide in slides:
+                f = BS(open(slide),'html.parser')
+                svg = f.svg
+                defs = svg.defs
+                paths = [x.prettify() for x in defs.find_all("path")]
+                defs.clear()
+                paths.sort()
+                g = BS(''.join(paths),'html.parser')
+                svg.defs.append(g)
+                content.append(svg)
+            return content 
+
+        content = gen_content(slides)
         #self.add_outputs(slides)
         html = self.template.render(slides=content)
         open("index.html",'w').write(html)
